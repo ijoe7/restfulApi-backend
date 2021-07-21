@@ -3,7 +3,7 @@ import {movieData, getMovieCharacters, postMovieComment, getMovieComments} from 
 
 var router = express.Router();
 
-router.get("/", movieData);
+router.get("/getMovieData", movieData);
 router.get("/characters/:id", getMovieCharacters);
 router.post("/postComment/:movieId", postMovieComment);
 router.get("/getComments", getMovieComments);
