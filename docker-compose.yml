@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  maxngbackend:
+    image: maxngbackend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    env_file: .env
+    ports:
+      - 3000:3000
+    links: 
+      - database
+    command: ['yarn', 'start']
+  database:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_PASSWORD: example
+    ports: 
+      - 11543:5431
+    volumes: 
+      - database-data:/var/lib/postgresql/data
+  
+volumes: 
+  database-data: {}
