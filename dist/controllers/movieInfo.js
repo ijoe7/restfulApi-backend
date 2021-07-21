@@ -135,19 +135,29 @@ var postMovieComment = function (req, res, next) { return __awaiter(void 0, void
 }); };
 exports.postMovieComment = postMovieComment;
 var getMovieComments = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var commentData, error_3;
     return __generator(this, function (_a) {
-        try {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, typeorm_1.createQueryBuilder('comments')
+                        .select('comments')
+                        .from(Comment_1.Comment, 'comments')
+                        .getMany()];
+            case 1:
+                commentData = _a.sent();
+                return [2 /*return*/, res.status(200).json({ message: ' Data retrieved successfully', commentData: commentData })];
+            case 2:
+                error_3 = _a.sent();
+                console.log(error_3.message);
+                return [2 /*return*/, res.status(400).json({ message: 'Error getting Data' })];
+            case 3: return [2 /*return*/];
         }
-        catch (error) {
-            console.log(error.message);
-            return [2 /*return*/, res.status(400).json({ message: 'Error getting Data' })];
-        }
-        return [2 /*return*/];
     });
 }); };
 exports.getMovieComments = getMovieComments;
 var getMovieCharacters = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var name_1, height, gender_1, id, data, info, characterList, characterLink, sortedData, heightCount, heightInfo, result, i, characterBio, characterData, totalNumberOfCharacters, i, totalNumberOfCharacters, i, error_3;
+    var name_1, height, gender_1, id, data, info, characterList, characterLink, sortedData, heightCount, heightInfo, result, i, characterBio, characterData, totalNumberOfCharacters, i, totalNumberOfCharacters, i, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -228,8 +238,8 @@ var getMovieCharacters = function (req, res, next) { return __awaiter(void 0, vo
                 }
                 return [3 /*break*/, 7];
             case 6:
-                error_3 = _a.sent();
-                console.log(error_3.message);
+                error_4 = _a.sent();
+                console.log(error_4.message);
                 return [2 /*return*/, res.status(400).json({ message: 'Error retrieving Data' })];
             case 7: return [2 /*return*/];
         }

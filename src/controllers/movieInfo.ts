@@ -92,7 +92,14 @@ export const postMovieComment = async (req: Request, res: Response, next: NextFu
 
 export const getMovieComments = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const commentData = await createQueryBuilder(
+            'comments'
+        )
+            .select('comments')
+            .from(Comment, 'comments')
+            .getMany()
         
+        return res.status(200).json({ message: ' Data retrieved successfully', commentData});
 
     } catch (error) {
         console.log(error.message);     
