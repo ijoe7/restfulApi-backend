@@ -3,6 +3,9 @@
 ## Postman Documentation:
 [Postman Documentation](https://documenter.getpostman.com/view/15642679/TzsWuWCu)
 
+## Heroku Link:
+[Heroku link](https://backendsegun.herokuapp.com/)
+
 ## Work-done
 ### Created Endpoints for:
 - Getting Movie information and comment count
