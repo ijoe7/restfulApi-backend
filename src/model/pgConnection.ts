@@ -8,14 +8,13 @@ dotenv.config()
 export const main = async () => {
     try {
         await createConnection({
-        type: process.env.TYPEORM_TYPE as "postgres",
-        host: process.env.TYPEORM_HOST,
-        port: 5431,
-        username: process.env.TYPEORM_USERNAME,
-        password: process.env.TYPEORM_PASSWORD,
-        database: process.env.TYPEORM_DATABASE,
+        type: "postgres",
+        url: process.env.DATABASE_URL,
         entities: [Comment, Movie],
-        synchronize: true
+            synchronize: true,
+            ssl: {
+            rejectUnauthorized: false
+        }
         })
         console.log("Connected to Postgres");
     } catch (error) {

@@ -52,14 +52,13 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, typeorm_1.createConnection({
-                        type: process.env.TYPEORM_TYPE,
-                        host: process.env.TYPEORM_HOST,
-                        port: 5431,
-                        username: process.env.TYPEORM_USERNAME,
-                        password: process.env.TYPEORM_PASSWORD,
-                        database: process.env.TYPEORM_DATABASE,
+                        type: "postgres",
+                        url: process.env.DATABASE_URL,
                         entities: [Comment_1.Comment, Movie_1.Movie],
-                        synchronize: true
+                        synchronize: true,
+                        ssl: {
+                            rejectUnauthorized: false
+                        }
                     })];
             case 1:
                 _a.sent();
