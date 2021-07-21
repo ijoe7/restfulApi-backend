@@ -41,71 +41,113 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMovieCharacters = exports.getMovieComments = exports.postMovieComment = exports.movieData = void 0;
 var axios_1 = __importDefault(require("axios"));
+var Comment_1 = require("../entities/Comment");
+var Movie_1 = require("../entities/Movie");
+var typeorm_1 = require("typeorm");
 var movieData = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, allMovieInfo, specificMovieInfo, error_1;
+    var databaseData, data, allMovieInfo, specificMovieInfo, result, savedData, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.get("https://swapi.dev/api/films/")];
+                _a.trys.push([0, 6, , 7]);
+                return [4 /*yield*/, typeorm_1.createQueryBuilder('movies')
+                        .select('movies')
+                        .from(Movie_1.Movie, 'movies')
+                        .leftJoinAndSelect('movies.comments', 'comments')
+                        .getMany()];
             case 1:
+                databaseData = _a.sent();
+                if (!!databaseData.length) return [3 /*break*/, 5];
+                return [4 /*yield*/, axios_1.default.get("https://swapi.dev/api/films/")];
+            case 2:
                 data = _a.sent();
                 allMovieInfo = data.data.results;
-                specificMovieInfo = allMovieInfo.map(function (info, index) {
-                    return {
-                        "id": index + 1,
-                        "movie_name": info.title,
-                        "opening_crawl": info.opening_crawl
-                    };
-                });
-                return [2 /*return*/, res.status(200).json({ message: ' Data retrieved successfully', specificMovieInfo: specificMovieInfo })];
-            case 2:
+                specificMovieInfo = allMovieInfo.map(function (info) { return __awaiter(void 0, void 0, void 0, function () {
+                    var movie, movieData;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                movie = Movie_1.Movie.create({
+                                    movie_title: info.title,
+                                    opening_crawl: info.opening_crawl
+                                });
+                                return [4 /*yield*/, movie.save()];
+                            case 1:
+                                movieData = _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [4 /*yield*/, Promise.all(specificMovieInfo)];
+            case 3:
+                result = _a.sent();
+                return [4 /*yield*/, Movie_1.Movie.find()];
+            case 4:
+                savedData = _a.sent();
+                return [2 /*return*/, res.status(201).json({ message: 'Data saved successfully', savedData: savedData })];
+            case 5: return [2 /*return*/, res.status(200).json({ message: ' Data retrieved successfully', databaseData: databaseData })];
+            case 6:
                 error_1 = _a.sent();
                 console.log(error_1.message);
                 return [2 /*return*/, res.status(400).json({ message: 'Error retrieving Data' })];
-            case 3: return [2 /*return*/];
+            case 7: return [2 /*return*/];
         }
     });
 }); };
 exports.movieData = movieData;
 var postMovieComment = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, error_2;
+    var movieId, movieComment, movies, comment, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.get("https://swapi.dev/api/films")];
+                _a.trys.push([0, 4, , 5]);
+                movieId = req.params.movieId;
+                movieComment = req.body.movieComment;
+                return [4 /*yield*/, Movie_1.Movie.findOne(parseInt(movieId))];
             case 1:
-                data = _a.sent();
-                return [3 /*break*/, 3];
+                movies = _a.sent();
+                if (!movies) {
+                    return [2 /*return*/, res.json({
+                            message: "Movie not found"
+                        })];
+                }
+                comment = Comment_1.Comment.create({
+                    movieComment: movieComment,
+                    movies: movies
+                });
+                return [4 /*yield*/, comment.save()];
             case 2:
+                _a.sent();
+                if (comment) {
+                    movies.comment_count += 1;
+                }
+                return [4 /*yield*/, movies.save()];
+            case 3:
+                _a.sent();
+                return [2 /*return*/, res.json({ message: "Comment added" })];
+            case 4:
                 error_2 = _a.sent();
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                console.log(error_2.message);
+                return [2 /*return*/, res.status(400).json({ message: 'Error posting Data' })];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
 exports.postMovieComment = postMovieComment;
 var getMovieComments = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, error_3;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.get("https://swapi.dev/api/films")];
-            case 1:
-                data = _a.sent();
-                return [3 /*break*/, 3];
-            case 2:
-                error_3 = _a.sent();
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+        try {
         }
+        catch (error) {
+            console.log(error.message);
+            return [2 /*return*/, res.status(400).json({ message: 'Error getting Data' })];
+        }
+        return [2 /*return*/];
     });
 }); };
 exports.getMovieComments = getMovieComments;
 var getMovieCharacters = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var name_1, height, gender_1, id, data, info, characterList, characterLink, sortedData, heightCount, heightInfo, result, i, characterBio, characterData, totalNumberOfCharacters, i, totalNumberOfCharacters, i, error_4;
+    var name_1, height, gender_1, id, data, info, characterList, characterLink, sortedData, heightCount, heightInfo, result, i, characterBio, characterData, totalNumberOfCharacters, i, totalNumberOfCharacters, i, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -186,17 +228,11 @@ var getMovieCharacters = function (req, res, next) { return __awaiter(void 0, vo
                 }
                 return [3 /*break*/, 7];
             case 6:
-                error_4 = _a.sent();
-                console.log(error_4.message);
+                error_3 = _a.sent();
+                console.log(error_3.message);
                 return [2 /*return*/, res.status(400).json({ message: 'Error retrieving Data' })];
             case 7: return [2 /*return*/];
         }
     });
 }); };
 exports.getMovieCharacters = getMovieCharacters;
-// export const movieData = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const data = await axios.get(`https://swapi.dev/api/films`);
-//     } catch (error) {
-//     }
-// }

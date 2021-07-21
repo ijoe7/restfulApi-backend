@@ -7,6 +7,8 @@
 var app = require("../dist/app.js").default;
 var debug = require('debug')('maxng-backend:server');
 var http = require('http');
+// var { main } = require("../dist/model/pgConnection.js").default;
+
 
 /**
  * Get port from environment and store in Express.

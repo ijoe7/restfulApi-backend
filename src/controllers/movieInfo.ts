@@ -1,13 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-
-
-interface Info {
-    id: number,
-    movie_title: string,
-    opening_crawl: string,
-    comments: string
-}
+import { Comment } from "../entities/Comment";
+import { Movie } from "../entities/Movie";
+import { createQueryBuilder } from "typeorm";
+import { count } from 'console';
 
 interface Character {
     characterInfo: Record<string,any>[],
@@ -17,19 +13,38 @@ interface Character {
 
 export const movieData = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await axios.get(`https://swapi.dev/api/films/`);
-        const allMovieInfo = data.data.results
 
-        const specificMovieInfo = allMovieInfo.map((info: Record<string, any>, index: number) => {
-            return {
-                "id": index + 1,
-                "movie_name": info.title,
-                "opening_crawl": info.opening_crawl
-            }
-        })
+        const databaseData = await createQueryBuilder(
+            'movies'
+        )
+            .select('movies')
+            .from(Movie, 'movies')
+            .leftJoinAndSelect(
+                'movies.comments', 'comments'
+        )
+            .getMany()
+        
+
+        if (!databaseData.length) {
+            
+            const data = await axios.get(`https://swapi.dev/api/films/`);
+            const allMovieInfo = data.data.results
+            
+            const specificMovieInfo = allMovieInfo.map(async (info: Record<string, any>) => {
+                    const movie = Movie.create({
+                        movie_title: info.title,
+                        opening_crawl: info.opening_crawl
+                    })
+                const movieData = await movie.save()
+                
+            })
+            const result = await Promise.all(specificMovieInfo);
+            const savedData = await Movie.find()
+            return res.status(201).json({message: 'Data saved successfully', savedData})
+        }
         
         
-        return res.status(200).json({ message: ' Data retrieved successfully', specificMovieInfo });
+        return res.status(200).json({ message: ' Data retrieved successfully', databaseData});
     } catch (error) {
         console.log(error.message);
         
@@ -40,20 +55,52 @@ export const movieData = async (req: Request, res: Response, next: NextFunction)
 
 export const postMovieComment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await axios.get(`https://swapi.dev/api/films`);
+
+        const { movieId } = req.params;
+
+        const { movieComment } = req.body;
+
+        const movies = await Movie.findOne(parseInt(movieId));
+
+        if (!movies) {
+            return res.json({
+                message: "Movie not found"
+            })
+        }
+
+        const comment = Comment.create({
+            movieComment,
+            movies
+        });
+
+        await comment.save()
+
+        
+        if (comment) {
+            movies.comment_count += 1
+        }
+        await movies.save()
+
+        return res.json({ message: "Comment added"})
 
     } catch (error) {
-        
+        console.log(error.message);     
+        return res.status(400).json({ message: 'Error posting Data' });
     }
 }
+
+
 export const getMovieComments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await axios.get(`https://swapi.dev/api/films`);
+        
 
     } catch (error) {
-        
+        console.log(error.message);     
+        return res.status(400).json({ message: 'Error getting Data' });
     }
 }
+
+
 export const getMovieCharacters = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const name = req.query.nameSort as string;
@@ -83,8 +130,6 @@ export const getMovieCharacters = async (req: Request, res: Response, next: Next
             let characterData = characterBio.data
             
             characterList.push(characterData)
-            // for (let j = 0; j < info.length; j++) {
-            // }
         }
         if (gender) {
             characterList = characterList.filter((item: Record<string, any>) => {
@@ -149,13 +194,3 @@ export const getMovieCharacters = async (req: Request, res: Response, next: Next
     }
 }
 
-
-
-// export const movieData = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const data = await axios.get(`https://swapi.dev/api/films`);
-
-//     } catch (error) {
-        
-//     }
-// }
