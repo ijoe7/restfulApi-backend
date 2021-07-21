@@ -1,5 +1,8 @@
 # Backend Project
 
+## Postman Documentation:
+[Postman Documentation](https://documenter.getpostman.com/view/15642679/TzsWuWCu)
+
 ## Work-done
 ### Created Endpoints for:
 - Getting Movie information and comment count
